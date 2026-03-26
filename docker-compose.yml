@@ -1,0 +1,22 @@
+services:
+  postgres:
+    # pgvector/pgvector is the current official image (successor of ankane/pgvector)
+    image: pgvector/pgvector:pg16
+    container_name: incident-triage-postgres
+    environment:
+      POSTGRES_DB: ${DB_NAME:-incidenttriage}
+      POSTGRES_USER: ${DB_USER:-triage}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-triage}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-triage} -d ${DB_NAME:-incidenttriage}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
